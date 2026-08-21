@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gear Generator - Generador de Engranajes 2D & 3D</title>
+    <meta name="description" content="Generador paramétrico de engranajes cilíndricos con vista previa 3D y exportación STL para impresión 3D." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <!-- Lienzo principal 3D Three.js -->
+    <div id="canvas-container"></div>
+
+    <!-- Interfaz de Verificación Visual 2D Superpuesta -->
+    <div id="ui-overlay">
+      <div class="panel-card" id="preview-panel">
+        <h3>Vista Previa 2D (Perfil de Involuta)</h3>
+        <canvas id="canvas-2d" width="280" height="280"></canvas>
+        <div class="legend">
+          <span class="dot pitch"></span> Primitivo
+          <span class="dot base"></span> Base
+          <span class="dot root"></span> Raíz
+          <span class="dot outside"></span> Cabeza
+        </div>
+      </div>
+      <div class="panel-card" id="controls-panel">
+        <h3>Parámetros</h3>
+        <div id="ui-container"></div>
+        <div class="info-box">
+          <strong>Relación de Transmisión: </strong> <span id="transmission-ratio">1.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel de acciones: descarga STL -->
+    <div id="actions-panel">
+      <button id="btn-download-stl" type="button" title="Descargar STL para impresión 3D">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Descargar STL</span>
+      </button>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
+
