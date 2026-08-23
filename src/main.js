@@ -1,3 +1,4 @@
+import { inject } from '@vercel/analytics';
 import './style.css';
 import * as THREE from 'three';
 import { createScene } from './scene/setup.js';
@@ -9,6 +10,9 @@ import { exportToSTL, downloadSTL } from './core/stlExporter.js';
 import { gearParams } from './ui/params.js';
 import { initUI } from './ui/events.js';
 import { GearTrain } from './core/gearTrain.js';
+
+// Inicializar Vercel Analytics
+inject();
 
 const container = document.getElementById('canvas-container');
 
