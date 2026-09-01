@@ -15,7 +15,7 @@ export function createScene(container) {
 
   // === SCENE ===
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x111111); // fondo oscuro profesional
+  scene.background = new THREE.Color(0x1e1e1e); // CAD dark grey background
 
   // === CAMERA ===
   const camera = new THREE.PerspectiveCamera(
@@ -42,13 +42,13 @@ export function createScene(container) {
   scene.add(ambientLight);
 
   // Luz direccional principal
-  const mainLight = new THREE.DirectionalLight(0xffffff, 0.9);
+  const mainLight = new THREE.DirectionalLight(0xffffff, 0.7);
   mainLight.position.set(80, 100, 60);
   mainLight.castShadow = true;
   scene.add(mainLight);
 
   // Luz de relleno (para que no haya zonas demasiado oscuras)
-  const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
+  const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
   fillLight.position.set(-60, 40, -40);
   scene.add(fillLight);
 
@@ -56,7 +56,7 @@ export function createScene(container) {
   const axesHelper = new THREE.AxesHelper(40);
   scene.add(axesHelper);
 
-  const gridHelper = new THREE.GridHelper(120, 24, 0x444444, 0x333333);
+  const gridHelper = new THREE.GridHelper(200, 100, 0x444444, 0x2a2a2a);
   scene.add(gridHelper);
 
   // === RESIZE ===

@@ -1,52 +1,192 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gear Generator - Generador de Engranajes 2D & 3D</title>
-    <meta name="description" content="Generador paramétrico de engranajes cilíndricos con vista previa 3D y exportación STL para impresión 3D." />
+    <title>GearGen - Parametric Gear Design Utility</title>
+    <meta name="description" content="Technical tool for generating custom involute gear profiles. Exact geometry for CAD and manufacturing." />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   </head>
   <body>
-    <!-- Lienzo principal 3D Three.js -->
-    <div id="canvas-container"></div>
-
-    <!-- Interfaz de Verificación Visual 2D Superpuesta -->
-    <div id="ui-overlay">
-      <div class="panel-card" id="preview-panel">
-        <h3>Vista Previa 2D (Perfil de Involuta)</h3>
-        <canvas id="canvas-2d" width="280" height="280"></canvas>
-        <div class="legend">
-          <span class="dot pitch"></span> Primitivo
-          <span class="dot base"></span> Base
-          <span class="dot root"></span> Raíz
-          <span class="dot outside"></span> Cabeza
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="#" class="logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          GearGen <span class="version" style="font-family:'JetBrains Mono', monospace; font-size: 11px; font-weight: normal; margin-left: 8px; color: #888;">v1.0.0</span>
+        </a>
+        <div class="nav-links">
+          <a href="#generator-section">Workspace</a>
+          <a href="#specs">Specifications</a>
+          <a href="#feedback">Feedback</a>
         </div>
       </div>
-      <div class="panel-card" id="controls-panel">
-        <h3>Parámetros</h3>
-        <div id="ui-container"></div>
-        <div class="info-box">
-          <strong>Relación de Transmisión: </strong> <span id="transmission-ratio">1.00</span>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+      <div class="hero-content">
+        <h1 class="hero-title">Involute Gear Generator</h1>
+        <p class="hero-subtitle">Parametric tool for exact involute gear profile calculation and 3D visualization. Export to STL for CAD assemblies and manufacturing.</p>
+      </div>
+    </header>
+
+    <!-- Generator Section (The App) -->
+    <section id="generator-section" class="generator-container">
+      <div class="app-wrapper">
+        <div id="app-main">
+          
+          <!-- Sidebar: Parameters & Inspections -->
+          <div id="ui-sidebar">
+            <div class="sidebar-header">
+              <h2>Gear Parameters</h2>
+            </div>
+            
+            <div id="controls-panel">
+              <div id="ui-container"></div>
+              
+              <div class="info-box" style="display: none;">
+                <span class="info-label">Transmission Ratio</span>
+                <span class="info-value mono" id="transmission-ratio">-</span>
+              </div>
+            </div>
+
+            <div class="sidebar-header" style="margin-top: 16px;">
+              <h2>Geometry Inspection</h2>
+            </div>
+            
+            <div id="preview-panel">
+              <div class="preview-canvas-container">
+                <canvas id="canvas-2d" width="280" height="280"></canvas>
+              </div>
+              <div class="data-readout">
+                <div class="readout-row">
+                  <div class="readout-label"><span class="dot outside"></span> Outside Dia.</div>
+                  <div class="readout-val mono" id="val-dia-outside">-- mm</div>
+                </div>
+                <div class="readout-row">
+                  <div class="readout-label"><span class="dot pitch"></span> Pitch Dia.</div>
+                  <div class="readout-val mono" id="val-dia-pitch">-- mm</div>
+                </div>
+                <div class="readout-row">
+                  <div class="readout-label"><span class="dot base"></span> Base Dia.</div>
+                  <div class="readout-val mono" id="val-dia-base">-- mm</div>
+                </div>
+                <div class="readout-row">
+                  <div class="readout-label"><span class="dot root"></span> Root Dia.</div>
+                  <div class="readout-val mono" id="val-dia-root">-- mm</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Viewport (3D Scene) -->
+          <div id="viewport">
+            <div id="canvas-container"></div>
+            
+            <!-- Actions -->
+            <div id="actions-panel">
+              <button id="btn-download-stl" class="btn btn-primary" type="button" title="Export as STL">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export STL
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Panel de acciones: descarga STL -->
-    <div id="actions-panel">
-      <button id="btn-download-stl" type="button" title="Descargar STL para impresión 3D">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        <span>Descargar STL</span>
-      </button>
-    </div>
+    <!-- Technical Specs -->
+    <section id="specs" class="specs container">
+      <div class="section-header">
+        <h2>Technical Specifications</h2>
+      </div>
+      <div class="specs-grid">
+        <div class="spec-item">
+          <strong>Profile Generation</strong>
+          <span>True involute curve, DIN 867 compliant.</span>
+        </div>
+        <div class="spec-item">
+          <strong>Clearance</strong>
+          <span>Calculated standard clearance (c = 0.25m).</span>
+        </div>
+        <div class="spec-item">
+          <strong>Export Format</strong>
+          <span>Standard .STL (Binary), ready for slicing.</span>
+        </div>
+        <div class="spec-item">
+          <strong>Computation</strong>
+          <span>Client-side WebGL / JavaScript (No server roundtrips).</span>
+        </div>
+      </div>
+    </section>
 
+    <!-- Feedback -->
+    <section id="feedback" class="feedback">
+      <div class="container feedback-container">
+        <h2>Feedback & Improvements</h2>
+        <p>Report issues or suggest parameters for future iterations.</p>
+        
+        <div class="feedback-box" id="feedback-box">
+          <h3 id="feedback-question">Was the geometry generated correctly?</h3>
+          <div class="feedback-actions" id="feedback-actions">
+            <button class="btn btn-outline" id="btn-feedback-yes"> Yes</button>
+            <button class="btn btn-outline" id="btn-feedback-no"> No</button>
+          </div>
+          <div id="feedback-form" style="display: none;">
+            <p id="feedback-prompt">Provide technical details:</p>
+            <textarea id="feedback-text" rows="3" placeholder="Expected behavior vs actual..."></textarea>
+            
+            <div class="form-group">
+              <label for="feedback-role">Primary Role</label>
+              <select id="feedback-role">
+                <option value="">Select (optional)</option>
+                <option value="Mechanical Engineer">Mechanical Engineer</option>
+                <option value="CAD Designer">CAD Designer</option>
+                <option value="Machinist / CNC">Machinist / CNC</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="feedback-email">Email (optional)</label>
+              <input type="email" id="feedback-email" placeholder="user@domain.com">
+            </div>
+
+            <p id="feedback-error" style="color: #ff6b6b; font-size: 14px; margin-bottom: 12px; display: none;"></p>
+            
+            <button class="btn btn-primary" id="btn-submit-feedback" style="width: 100%;">Submit Report</button>
+          </div>
+          <div id="feedback-success" style="display: none;">
+            <p>Report submitted successfully.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-logo">
+            GearGen Utility
+          </div>
+          <p class="footer-copy">&copy; 2026 GearGen. Source code available internally.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/src/analytics.js" type="module"></script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
-

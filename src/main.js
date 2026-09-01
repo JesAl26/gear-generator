@@ -10,9 +10,13 @@ import { exportToSTL, downloadSTL } from './core/stlExporter.js';
 import { gearParams } from './ui/params.js';
 import { initUI } from './ui/events.js';
 import { GearTrain } from './core/gearTrain.js';
+import { trackEvent } from './analytics.js';
 
 // Inicializar Vercel Analytics
 inject();
+
+let hasTrackedStart = false;
+let lastGenerateTrackTime = 0;
 
 const container = document.getElementById('canvas-container');
 
@@ -109,11 +113,26 @@ if (!container) {
     pinion.generate();
 
     pinionMesh = updateGearInScene(scene, pinionMesh, pinion, {
-      color: 0x00e5ff,
-      metalness: 0.6,
-      roughness: 0.25
+      color: 0x888888,
+      metalness: 0.4,
+      roughness: 0.6
     });
     pinionMesh.position.set(0, 0, 0);
+
+    // Actualizar readouts de diámetros en la UI
+    const pitchDia = pinion.pitchRadius * 2;
+    const outsideDia = pinion.outsideRadius * 2;
+    const baseDia = pinion.baseRadius * 2;
+    const rootDia = pinion.rootRadius * 2;
+    
+    const elPitch = document.getElementById('val-dia-pitch');
+    if(elPitch) elPitch.textContent = pitchDia.toFixed(2) + ' mm';
+    const elOutside = document.getElementById('val-dia-outside');
+    if(elOutside) elOutside.textContent = outsideDia.toFixed(2) + ' mm';
+    const elBase = document.getElementById('val-dia-base');
+    if(elBase) elBase.textContent = baseDia.toFixed(2) + ' mm';
+    const elRoot = document.getElementById('val-dia-root');
+    if(elRoot) elRoot.textContent = rootDia.toFixed(2) + ' mm';
 
     // =========================================================================
     // ENGRANAJE 2: RUEDA (solo si gearCount === 2)
@@ -131,9 +150,9 @@ if (!container) {
       wheel.generate();
 
       wheelMesh = updateGearInScene(scene, wheelMesh, wheel, {
-        color: 0xff8800,
-        metalness: 0.6,
-        roughness: 0.25
+        color: 0x7a7a7a,
+        metalness: 0.4,
+        roughness: 0.6
       });
 
       // Posicionar y acoplar automáticamente (inicial, la animación lo actualizará luego)
@@ -169,6 +188,23 @@ if (!container) {
       if (infoBox) infoBox.style.display = 'none';
       exportableMeshes = [pinionMesh];
     }
+    
+    // Tracking generator interaction
+    if (!hasTrackedStart) {
+      hasTrackedStart = true;
+      trackEvent('generator_started', { timestamp: Date.now() });
+    }
+    
+    // Throttle gear_generated tracking to avoid spamming while dragging sliders
+    const now = Date.now();
+    if (now - lastGenerateTrackTime > 1000) {
+      trackEvent('gear_generated', { 
+        module: gearParams.module, 
+        teeth1: gearParams.teeth1,
+        gearCount: gearParams.gearCount
+      });
+      lastGenerateTrackTime = now;
+    }
   }
 
   // Inicializar UI y pasar callback para actualizar gears
@@ -189,6 +225,12 @@ if (!container) {
         const blob = exportToSTL(exportableMeshes);
         const timestamp = new Date().toISOString().slice(0, 10);
         downloadSTL(blob, `engranaje_${timestamp}.stl`);
+        
+        // Track the download event
+        trackEvent('gear_downloaded', { 
+          sizeKB: Math.round(blob.size / 1024),
+          gearCount: gearParams.gearCount
+        });
         console.log(`STL exportado: ${(blob.size / 1024).toFixed(1)} KB`);
       } catch (err) {
         console.error('Error al exportar STL:', err);
